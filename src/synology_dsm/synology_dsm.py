@@ -428,6 +428,13 @@ class SynologyDSM:
         return False
 
     @property
+    def audio_station(self) -> SynoAudioStation:
+        """Gets NAS AudioStation."""
+        if not self._audio:
+            self._audio = SynoAudioStation(self)
+        return self._audio
+
+    @property
     def download_station(self) -> SynoDownloadStation:
         """Gets NAS DownloadStation."""
         if not self._download:
@@ -496,10 +503,3 @@ class SynologyDSM:
         if not self._utilisation:
             self._utilisation = SynoCoreUtilization(self)
         return self._utilisation
-
-    @property
-    def audio_station(self) -> SynoAudioStation:
-        """Gets NAS AudtioStation."""
-        if not self._audio:
-            self._audio = SynoAudioStation(self)
-        return self._audio
