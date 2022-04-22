@@ -1,0 +1,44 @@
+{
+    "data": {
+        "players": [
+            {
+                "id": "uuid:a756f073-d134-4834-995b-6be38be4b190",
+                "is_multiple": false,
+                "name": "Denon AVR-X2700H (DLNA)",
+                "password_protected": false,
+                "support_seek": true,
+                "support_set_volume": true,
+                "type": "upnp"
+            },
+            {
+                "id": "uuid:bf56262a-d0ae-4e86-b32a-e26d61f6de6e",
+                "is_multiple": false,
+                "name": "TV TV",
+                "password_protected": false,
+                "support_seek": true,
+                "support_set_volume": true,
+                "type": "upnp"
+            },
+            {
+                "id": "0006785AC8AE",
+                "is_multiple": false,
+                "name": "Denon AVR-X2700H (AirPlay)",
+                "password_protected": false,
+                "support_seek": true,
+                "support_set_volume": true,
+                "type": "airplay"
+            },
+            {
+                "id": "__SYNO_Multiple_AirPlay__",
+                "is_multiple": true,
+                "name": "Multiple AirPlay Devices",
+                "password_protected": false,
+                "support_seek": true,
+                "support_set_volume": true,
+                "type": "airplay",
+                "additional": {"subplayer_list": []}
+            }
+        ]
+    },
+    "success": true
+}

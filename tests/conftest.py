@@ -8,7 +8,7 @@ from . import VALID_PASSWORD
 from . import VALID_PORT
 from . import VALID_USER
 from . import VALID_VERIFY_SSL
-from synology_dsm.synology_dsm import SynologyDSM
+from src.synology_dsm.synology_dsm import SynologyDSM
 
 
 @pytest.fixture

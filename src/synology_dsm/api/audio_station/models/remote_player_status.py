@@ -1,10 +1,12 @@
+from typing import Optional
+
 from .song import Song
 from .play_mode import PlayMode
 from .playlist_status import PlaylistStatus
 
 
 class RemotePlayerStatus:
-    """An representation of a Synology Remote player status."""
+    """A representation of a Synology Remote player status."""
 
     def __init__(self, data):
         """Initialize a Synology Remote player status."""
@@ -52,7 +54,7 @@ class RemotePlayerStatus:
         return self._data["stop_index"]
 
     @property
-    def subplayer_volume(self) -> int:
+    def subplayer_volume(self) -> Optional[int]:
         """Return subplayer_volume"""
         return self._data["subplayer_volume"]
 

@@ -1,4 +1,5 @@
-"""DSM 6 datas."""
+"""DSM 7 datas."""
+
 from .const_7_api_auth import DSM_7_AUTH_LOGIN
 from .const_7_api_auth import DSM_7_AUTH_LOGIN_2SA
 from .const_7_api_auth import DSM_7_AUTH_LOGIN_2SA_OTP
@@ -14,5 +15,5 @@ __all__ = [
     "DSM_7_API_INFO",
     "DSM_7_CORE_UPGRADE_FALSE",
     "DSM_7_CORE_UPGRADE_TRUE",
-    "DSM_7_DSM_INFORMATION",
+    "DSM_7_DSM_INFORMATION"
 ]

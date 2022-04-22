@@ -9,6 +9,6 @@ class PlayerList:
         self._players = list(map(Player, data["players"]))
 
     @property
-    def id(self) -> List[Player]:
+    def players(self) -> List[Player]:
         """Return player id"""
         return self._players

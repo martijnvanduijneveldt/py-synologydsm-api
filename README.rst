@@ -63,14 +63,14 @@ Login
 
 The library automatically login at first request, but you better use the ``login()`` function separately to authenticate.
 
-It will return a boolean if it successed or faild to authenticate to DSM.
+It will return a boolean if it succeeded or failed to authenticate to DSM.
 
 If your account need a two-step authentication (2SA), ``login()`` will raise ``SynologyDSMLogin2SARequiredException``.
 Call the function again with a One Time Password (OTP) as parameter, like ``login("123456")`` (better to be a string to handle first zero).
 Store the ``device_token`` property so that you do not need to reconnect with password the next time you open a new ``SynologyDSM`` session.
 
 
-Code exemple
+Code example
 ------------
 
 Every API has an ``update()`` function that is needed to get the first data, then the data is cached and updated at the next ``update()`` call.
@@ -128,6 +128,67 @@ The ``SynologyDSM`` class can also ``update()`` all APIs at once.
         print("Recycle Bin Enabled: " + str(api.share.share_recycle_bin(share_uuid)))
         print("--")
 
+
+Audio Station usage
+--------------------------
+
+.. code-block:: python
+
+    from synology_dsm import SynologyDSM
+
+    api = SynologyDSM("<IP/DNS>", "<port>", "<username>", "<password>")
+
+    if "SYNO.AudioStation.Info" in api.apis:
+
+        print("=== Audio Station ===")
+        api.audio_station.update()
+        print("Serial number:   " + str(api.audio_station.info.serial))
+        print("Short Audio Station version:" + str(api.information.version))
+        print("Full  Audio Station version:" + str(api.information.version_string))
+
+        print("=== Audio Station Remote Players ===")
+        for remote_player in api.audio_station.remote_players:
+            print("Player name:      " + str(remote_player.player.id))
+            print("Player id:        " + str(remote_player.player.id))
+            print("--")
+
+        # Get player with id
+        player = api.audio_station.get_remote_player("uuid:someuuid")
+
+        # Get current playlist
+        playlist = player.get_current_playlist()
+
+        print("=== Playlist ===")
+        print("Current song index: " + str(playlist.current))
+        print("Total songs :       " + str(playlist.total))
+        print("--")
+
+        for index, song in enumerate(playlist.songs):
+            print(str(index)+" - "+str(song.additional.song_tag.artist) + " - "+str(song.title))
+
+        # Clear playlist
+        player.clear_playlist()
+
+        # Play all songs of an artist
+        player.play_artist("Adele", SongSortMode.album, QueueMode.enqueue)
+
+        # Play an album
+        player.play_album("25", "Adele", SongSortMode.track, QueueMode.enqueue)
+
+        # Got to track in playlist
+        player.jump_to_song(10)
+
+        # Interact with queue (play, pause, stop, next, prev)
+        player.control(RemotePlayerAction.pause)
+
+        # Set volume (from 0 to 100)
+        player.volume(50)
+
+        # Set shuffle mode
+        player.shuffle(ShuffleMode.none)
+
+        # Set repeat mode (all, none, one)
+        player.repeat(RepeatMode.all)
 
 Download Station usage
 --------------------------
@@ -262,6 +323,7 @@ Upgrade usage
     upgrade.service_restarts
 
 
+
 Credits / Special Thanks
 ========================
 - https://github.com/florianeinfalt
@@ -272,6 +334,7 @@ Credits / Special Thanks
 - https://github.com/snjoetw    (Surveillance Station library)
 - https://github.com/shenxn     (Surveillance Station tests)
 - https://github.com/Gestas     (Shared Folders)
+- https://github.com/martijnvanduijneveldt     (Audio Station API & tests)
 
 Found Synology API "documentation" on this repo : https://github.com/kwent/syno/tree/master/definitions
 

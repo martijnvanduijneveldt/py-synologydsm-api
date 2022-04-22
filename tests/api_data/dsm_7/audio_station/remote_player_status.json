@@ -1,0 +1,43 @@
+{
+    "data": {
+        "index": 0,
+        "play_mode": {
+            "repeat": "none",
+            "shuffle": false
+        },
+        "playlist_timestamp": 1650661485,
+        "playlist_total": 20,
+        "position": 0,
+        "song": {
+            "additional": {
+                "song_audio": {
+                    "bitrate": 320000,
+                    "channel": 1,
+                    "duration": 295,
+                    "filesize": 1,
+                    "frequency": 0
+                },
+                "song_tag": {
+                    "album": "25",
+                    "album_artist": "Adele",
+                    "artist": "Adele",
+                    "comment": "Some random comment",
+                    "composer": "Adele Adkins & Greg Kurstin",
+                    "disc": 1,
+                    "genre": "Pop",
+                    "track": 1,
+                    "year": 2015
+                }
+            },
+            "id": "music_20508",
+            "path": "music/Adele/25 [2015]/CD1 - 01 - Hello.mp3",
+            "title": "Hello",
+            "type": "file"
+        },
+        "state": "transitioning",
+        "stop_index": 0,
+        "subplayer_volume": null,
+        "volume": 42
+    },
+    "success": true
+}

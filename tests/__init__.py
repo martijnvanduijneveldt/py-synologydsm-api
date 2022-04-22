@@ -1,5 +1,6 @@
 """Library tests."""
-from json import JSONDecodeError
+import json
+from os.path import abspath, join, dirname
 from urllib.parse import urlencode
 
 from requests.exceptions import ConnectionError as ConnError
@@ -55,20 +56,28 @@ from .const import ERROR_AUTH_INVALID_CREDENTIALS
 from .const import ERROR_AUTH_MAX_TRIES
 from .const import ERROR_AUTH_OTP_AUTHENTICATE_FAILED
 from .const import ERROR_INSUFFICIENT_USER_PRIVILEGE
-from synology_dsm import SynologyDSM
-from synology_dsm.api.core.security import SynoCoreSecurity
-from synology_dsm.api.core.share import SynoCoreShare
-from synology_dsm.api.core.system import SynoCoreSystem
-from synology_dsm.api.core.upgrade import SynoCoreUpgrade
-from synology_dsm.api.core.utilization import SynoCoreUtilization
-from synology_dsm.api.download_station import SynoDownloadStation
-from synology_dsm.api.dsm.information import SynoDSMInformation
-from synology_dsm.api.dsm.network import SynoDSMNetwork
-from synology_dsm.api.storage.storage import SynoStorage
-from synology_dsm.api.surveillance_station import SynoSurveillanceStation
-from synology_dsm.const import API_AUTH
-from synology_dsm.const import API_INFO
-from synology_dsm.exceptions import SynologyDSMRequestException
+from src.synology_dsm import SynologyDSM
+from src.synology_dsm.api.audio_station import AudioStationApi
+from src.synology_dsm.api.core.security import SynoCoreSecurity
+from src.synology_dsm.api.core.share import SynoCoreShare
+from src.synology_dsm.api.core.system import SynoCoreSystem
+from src.synology_dsm.api.core.upgrade import SynoCoreUpgrade
+from src.synology_dsm.api.core.utilization import SynoCoreUtilization
+from src.synology_dsm.api.download_station import SynoDownloadStation
+from src.synology_dsm.api.dsm.information import SynoDSMInformation
+from src.synology_dsm.api.dsm.network import SynoDSMNetwork
+from src.synology_dsm.api.storage.storage import SynoStorage
+from src.synology_dsm.api.surveillance_station import SynoSurveillanceStation
+from src.synology_dsm.const import API_AUTH
+from src.synology_dsm.const import API_INFO
+from src.synology_dsm.exceptions import SynologyDSMRequestException
+
+
+def load_json(filepath: str):
+    path = join(dirname(abspath(__file__)), filepath)
+    with open(path, 'r') as json_file:
+        return json.load(json_file)
+
 
 API_SWITCHER = {
     5: {
@@ -109,9 +118,13 @@ API_SWITCHER = {
         "AUTH_LOGIN_2SA_OTP": DSM_7_AUTH_LOGIN_2SA_OTP,
         "CORE_UPGRADE": DSM_7_CORE_UPGRADE_TRUE,
         "DSM_INFORMATION": DSM_7_DSM_INFORMATION,
+        "AUDIO_STATION": {
+            "INFO": load_json("api_data/dsm_7/audio_station/info.json"),
+            "PLAYER_LIST": load_json("api_data/dsm_7/audio_station/remote_player_list.json"),
+            "REMOTE_PLAYER_STATUS": load_json("api_data/dsm_7/audio_station/remote_player_status.json")
+        }
     },
 }
-
 
 VALID_HOST = "nas.mywebsite.me"
 VALID_PORT = "443"
@@ -131,16 +144,16 @@ class SynologyDSMMock(SynologyDSM):
     API_URI = "api="
 
     def __init__(
-        self,
-        dsm_ip,
-        dsm_port,
-        username,
-        password,
-        use_https=False,
-        verify_ssl=False,
-        timeout=None,
-        device_token=None,
-        debugmode=False,
+            self,
+            dsm_ip,
+            dsm_port,
+            username,
+            password,
+            use_https=False,
+            verify_ssl=False,
+            timeout=None,
+            device_token=None,
+            debugmode=False,
     ):
         """Constructor method."""
         SynologyDSM.__init__(
@@ -185,7 +198,7 @@ class SynologyDSMMock(SynologyDSM):
 
         if VALID_PORT not in url and "https" not in url:
             raise SynologyDSMRequestException(
-                JSONDecodeError("Expecting value", "<html>document</html>", 0)
+                json.JSONDecodeError("Expecting value", "<html>document</html>", 0)
             )
 
         if VALID_PORT not in url:
@@ -292,18 +305,30 @@ class SynologyDSMMock(SynologyDSM):
                     return DSM_6_SURVEILLANCE_STATION_HOME_MODE_SWITCH
 
             if (
-                "SYNO.FileStation.Upload" in url
-                and "upload" in url
-                and "file_already_exists" in kwargs["files"]["file"]
+                    "SYNO.FileStation.Upload" in url
+                    and "upload" in url
+                    and "file_already_exists" in kwargs["files"]["file"]
             ):
                 return {"error": {"code": 1805}, "success": False}
 
             if (
-                "SYNO.DownloadStation2.Task" in url
-                and "create" in url
-                and "test_not_exists" in url
+                    "SYNO.DownloadStation2.Task" in url
+                    and "create" in url
+                    and "test_not_exists" in url
             ):
                 return {"error": {"code": 408}, "success": False}
+
+            if AudioStationApi.INFO_API_KEY in url:
+                if "getinfo" in params["method"]:
+                    return API_SWITCHER[self.dsm_version]["AUDIO_STATION"]["INFO"]
+
+            if AudioStationApi.REMOTE_PLAYER_KEY in url:
+                if "list" in params["method"]:
+                    return API_SWITCHER[self.dsm_version]["AUDIO_STATION"]["PLAYER_LIST"]
+
+            if AudioStationApi.REMOTE_PLAYER_STATUS_KEY in url:
+                if "getstatus" in params["method"]:
+                    return API_SWITCHER[self.dsm_version]["AUDIO_STATION"]["REMOTE_PLAYER_STATUS"]
 
             return {"success": False}
 

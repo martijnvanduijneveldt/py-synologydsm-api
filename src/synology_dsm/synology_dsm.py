@@ -2,13 +2,14 @@
 import logging
 import socket
 from json import JSONDecodeError
+from typing import Optional
 from urllib.parse import quote
 
 import urllib3
 from requests import Session
 from requests.exceptions import RequestException
 
-from .api.audio_station import SynoAudioStation
+from .api.audio_station import SynoAudioStation, AudioStationApi
 from .api.core.security import SynoCoreSecurity
 from .api.core.share import SynoCoreShare
 from .api.core.system import SynoCoreSystem
@@ -44,16 +45,16 @@ class SynologyDSM:
     ]
 
     def __init__(
-        self,
-        dsm_ip: str,
-        dsm_port: int,
-        username: str,
-        password: str,
-        use_https: bool = False,
-        verify_ssl: bool = False,
-        timeout: int = None,
-        device_token: str = None,
-        debugmode: bool = False,
+            self,
+            dsm_ip: str,
+            dsm_port: int,
+            username: str,
+            password: str,
+            use_https: bool = False,
+            verify_ssl: bool = False,
+            timeout: int = None,
+            device_token: str = None,
+            debugmode: bool = False,
     ):
         """Constructor method."""
         self.username = username
@@ -75,17 +76,17 @@ class SynologyDSM:
         self._apis = {
             "SYNO.API.Info": {"maxVersion": 1, "minVersion": 1, "path": "query.cgi"}
         }
-        self._download = None
-        self._information = None
-        self._network = None
-        self._security = None
-        self._share = None
-        self._storage = None
-        self._surveillance = None
-        self._system = None
-        self._utilisation = None
-        self._upgrade = None
-        self._audio = None
+        self._download: Optional[SynoDownloadStation] = None
+        self._information: Optional[SynoDSMInformation] = None
+        self._network: Optional[SynoDSMNetwork] = None
+        self._security: Optional[SynoCoreSecurity] = None
+        self._share: Optional[SynoCoreShare] = None
+        self._storage: Optional[SynoStorage] = None
+        self._surveillance: Optional[SynoSurveillanceStation] = None
+        self._system: Optional[SynoCoreSystem] = None
+        self._utilisation: Optional[SynoCoreUtilization] = None
+        self._upgrade: Optional[SynoCoreUpgrade] = None
+        self._audio: Optional[SynoAudioStation] = None
 
         # Build variables
         if use_https:
@@ -111,10 +112,10 @@ class SynologyDSM:
         Only handles DSM 5 for now.
         """
         return (
-            api in self.DSM_5_WEIRD_URL_API
-            and self._information
-            and self._information.version
-            and int(self._information.version) < 7321  # < DSM 6
+                api in self.DSM_5_WEIRD_URL_API
+                and self._information
+                and self._information.version
+                and int(self._information.version) < 7321  # < DSM 6
         )
 
     def _build_url(self, api: str) -> str:
@@ -219,13 +220,13 @@ class SynologyDSM:
         return self._request("POST", api, method, params, **kwargs)
 
     def _request(
-        self,
-        request_method: str,
-        api: str,
-        method: str,
-        params: dict = None,
-        retry_once: bool = True,
-        **kwargs,
+            self,
+            request_method: str,
+            api: str,
+            method: str,
+            params: dict = None,
+            retry_once: bool = True,
+            **kwargs,
     ):
         """Handles API request."""
         # Discover existing APIs
@@ -339,6 +340,9 @@ class SynologyDSM:
 
     def update(self, with_information: bool = False, with_network: bool = False):
         """Updates the various instanced modules."""
+        if self._audio:
+            self._audio.update()
+
         if self._download:
             self._download.update()
 
@@ -377,6 +381,9 @@ class SynologyDSM:
             if hasattr(self, "_" + api):
                 setattr(self, "_" + api, None)
                 return True
+            if api == AudioStationApi.API_KEY:
+                self._audio = None
+                return True
             if api == SynoCoreSecurity.API_KEY:
                 self._security = None
                 return True
@@ -401,6 +408,9 @@ class SynologyDSM:
             if api == SynoSurveillanceStation.API_KEY:
                 self._surveillance = None
                 return True
+        if isinstance(api, SynoAudioStation):
+            self._audio = None
+            return True
         if isinstance(api, SynoCoreSecurity):
             self._security = None
             return True
